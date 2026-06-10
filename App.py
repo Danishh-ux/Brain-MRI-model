@@ -49,13 +49,18 @@ if uploaded_file is not None:
         probabilities = torch.nn.functional.softmax(outputs[0], dim=0)
         predicted_idx = torch.argmax(probabilities).item()
         confidence = probabilities[predicted_idx].item() * 100
-    
+
     st.subheader("Results:")
     prediction = CLASS_NAMES[predicted_idx]
     
-    if "No Tumor" in prediction:
-        st.success(f"Prediction: **{prediction}**")
+    if confidence < 75.0:
+        st.warning(f"⚠️ **Low Confidence ({confidence:.2f}%)**")
+        st.write(f"The model guessed **{prediction}**, but the confidence is too low. Please ensure you are uploading a valid, clear 2D Brain MRI scan.")
+    
     else:
-        st.error(f"Prediction: **{prediction}**")
-        
-    st.info(f"Confidence: **{confidence:.2f}%**")
+        if "No Tumor" in prediction:
+            st.success(f"Prediction: **{prediction}**")
+        else:
+            st.error(f"Prediction: **{prediction}**")
+            
+        st.info(f"Confidence: **{confidence:.2f}%**")
